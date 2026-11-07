@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aerospace Physics Simulation | Flight Mechanics Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --accent-blue: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --border-color: #30363d;
+            --warning-red: #da3633;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 1.8rem;
+            margin: 0 0 8px 0;
+        }
+
+        .author-tag {
+            font-size: 0.95rem;
+            color: var(--accent-blue);
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .intro-text {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .equation-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 1.1rem;
+            color: #ffffff;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 650px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .val-display {
+            color: var(--accent-blue);
+        }
+
+        input[type="range"] {
+            width: 100%;
+            background: var(--border-color);
+            accent-color: var(--accent-blue);
+            height: 6px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .metric-display {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .metric-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ffffff;
+            font-family: monospace;
+        }
+
+        .status-box {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            display: none;
+        }
+
+        .status-stall {
+            background-color: rgba(218, 54, 51, 0.15);
+            border: 1px solid var(--warning-red);
+            color: #ff7b72;
+            display: block;
+        }
+
+        .status-nominal {
+            background-color: rgba(56, 139, 253, 0.15);
+            border: 1px solid var(--accent-blue);
+            color: #79c0ff;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Aerospace Mechanics & Lift Simulation</h1>
+            <div class="author-tag">Developed by Rabib Abdus Ome</div>
+            <p class="intro-text">
+                An interactive flight physics dashboard investigating the fluid dynamics of a standard wing chord profile. 
+                This module models total vertical aerodynamic lift generation based on altitude air density, velocity matrices, and lift coefficients.
+            </p>
+        </header>
+
+        <div class="equation-box">
+            Lift Formula: L = 0.5 &times; &rho; &times; v&sup2; &times; A &times; C<sub>L</sub>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Controls Panel -->
+            <div class="panel">
+                <div class="control-group">
+                    <label>Airspeed (v) <span class="val-display" id="v-val">150 m/s</span></label>
+                    <input type="range" id="speed" min="20" max="350" value="150" step="5">
+                </div>
+
+                <div class="control-group">
+                    <label>Altitude / Density (&rho;) <span class="val-display" id="rho-val">1.225 kg/m³</span></label>
+                    <input type="range" id="density" min="0.2" max="1.3" value="1.225" step="0.005">
+                </div>
+
+                <div class="control-group">
+                    <label>Wing Surface Area (A) <span class="val-display" id="area-val">30 m²</span></label>
+                    <input type="range" id="area" min="10" max="120" value="30" step="1">
+                </div>
+
+                <div class="control-group">
+                    <label>Lift Coefficient (C<sub>L</sub>) <span class="val-display" id="cl-val">0.60</span></label>
+                    <input type="range" id="coefficient" min="0.1" max="1.8" value="0.6" step="0.05">
+                </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="panel metric-display">
+                <div class="metric-title">Calculated Aerodynamic Lift</div>
+                <div class="metric-value" id="lift-output">0 N</div>
+                <div id="status-alert" class="status-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const speedInput = document.getElementById('speed');
+        const densityInput = document.getElementById('density');
+        const areaInput = document.getElementById('area');
+        const coeffInput = document.getElementById('coefficient');
+
+        const vVal = document.getElementById('v-val');
+        const rhoVal = document.getElementById('rho-val');
+        const areaVal = document.getElementById('area-val');
+        const clVal = document.getElementById('cl-val');
+        const liftOutput = document.getElementById('lift-output');
+        const statusAlert = document.getElementById('status-alert');
+
+        function calculateLift() {
+            const v = parseFloat(speedInput.value);
+            const rho = parseFloat(densityInput.value);
+            const A = parseFloat(areaInput.value);
+            const Cl = parseFloat(coeffInput.value);
+
+            // Real aerodynamic lift equation: L = 0.5 * rho * v^2 * A * Cl
+            const lift = 0.5 * rho * Math.pow(v, 2) * A * Cl;
+
+            // Format units cleanly
+            if (lift >= 1000) {
+                liftOutput.innerText = (lift / 1000).toFixed(2) + ' kN';
+            } else {
+                liftOutput.innerText = lift.toFixed(0) + ' N';
+            }
+
+            // Dynamic logic constraints (Aerodynamic performance indicators)
+            if (v < 60 && Cl > 1.4) {
+                statusAlert.innerText = "WARNING: HIGH ANGLE OF ATTACK / AERODYNAMIC STALL RISK";
+                statusAlert.className = "status-box status-stall";
+            } else if (lift < 15000) {
+                statusAlert.innerText = "INSUFFICIENT LIFT FOR SUSTAINED LEVEL FLIGHT";
+                statusAlert.className = "status-box status-stall";
+            } else {
+                statusAlert.innerText = "NOMINAL FLIGHT PROFILE ENVELOPE MET";
+                statusAlert.className = "status-box status-nominal";
+            }
+
+            // Update UI labels
+            vVal.innerText = v + ' m/s';
+            rhoVal.innerText = rho.toFixed(3) + ' kg/m³';
+            areaVal.innerText = A + ' m²';
+            clVal.innerText = Cl.toFixed(2);
+        }
+
+        // Add event listeners to watch the sliders move
+        speedInput.addEventListener('input', calculateLift);
+        densityInput.addEventListener('input', calculateLift);
+        areaInput.addEventListener('input', calculateLift);
+        coeffInput.addEventListener('input', calculateLift);
+
+        // Run calculation once on page initialization
+        calculateLift();
+    </script>
+</body>
+</html>
